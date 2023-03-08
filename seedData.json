@@ -1,0 +1,19 @@
+{
+  "chains": [
+    {
+      "name": "BSC",
+      "dexes": [
+        {
+          "name": "PanCakeSwap-v2-Testnet",
+          "link": "https://pancakeswap.finance/add/0x03dE7B5C7fE057BC2e84BbB206EdE928f1a5e131/0x3D375031b7e557699cB54a101996593Ca80B68A6?chain=bscTestnet",
+          "factoryAddress": "0x6725f303b657a9451d8ba641348b6761a6cc7a17"
+        },
+        {
+          "name": "PanCakeSwap-v2",
+          "link": "afsdfsd",
+          "factoryAddress": "0xca143ce32fe78f1f7019d7d551a6402fc5350c73"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,1 @@
+export const CRAWL_PAIR_QUEUE = 'CRAWL_PAIR_QUEUE';

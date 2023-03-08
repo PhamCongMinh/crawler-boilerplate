@@ -1,0 +1,28 @@
+{
+  "singleQuote": true,
+  "trailingComma": "all",
+  "semi": true,
+  "printWidth": 120,
+  "tabWidth": 4,
+  "arrowParens": "avoid",
+  "importOrder": [
+    "^@nest/(.*)$",
+    "^@abis/(.*)$",
+    "^@config/(.*)$",
+    "^@constants/(.*)$",
+    "^@core/(.*)$",
+    "^@entities/(.*)$",
+    "^@guards/(.*)$",
+    "^@modules/(.*)$",
+    "^@shared/(.*)$",
+    "^[./]"
+  ],
+  "importOrderSeparation": true,
+  "importOrderSortSpecifiers": true,
+  "importOrderCaseInsensitive": true,
+  "importOrderParserPlugins": [
+    "classProperties",
+    "decorators-legacy",
+    "typescript"
+  ]
+}

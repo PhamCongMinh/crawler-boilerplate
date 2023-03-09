@@ -8,5 +8,5 @@ module.exports = {
     },
     username: 'nft',
     password: 'example',
-    queues: ['CRAWL_PAIR_QUEUE'],
+    queues: ['crawler'],
 };

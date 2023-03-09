@@ -1,6 +1,5 @@
 import { Module } from '@nestjs/common';
 
-import { CrawlerConsole } from '@modules/crawler/crawler.console';
 import { MongooseModule } from '@nestjs/mongoose';
 import { LatestBlock, LatestBlockSchema } from '@models/entities/LatestBlock.entity';
 import LatestBlockRepository from '@models/repositories/LatestBlock.repository';
@@ -13,9 +12,15 @@ import { Helper } from '@modules/crawler/helper';
 import { ContractService } from '@modules/crawler/contract.service';
 import { PairRepository } from '@models/repositories/Pair.repository';
 import { Pair, PairSchema } from '@models/entities/Pair.entity';
+import { BullModule } from '@nestjs/bull';
+import { CrawlerProducer } from '@modules/crawler/crawler.producer';
+import { CrawlerConsumer } from '@modules/crawler/crawler.consumer';
 
 @Module({
     imports: [
+        BullModule.registerQueueAsync({
+            name: 'crawler',
+        }),
         MongooseModule.forFeature([
             {
                 name: LatestBlock.name,
@@ -37,7 +42,6 @@ import { Pair, PairSchema } from '@models/entities/Pair.entity';
     ],
     controllers: [],
     providers: [
-        CrawlerConsole,
         CrawlerService,
         LatestBlockRepository,
         DexRepository,
@@ -45,6 +49,8 @@ import { Pair, PairSchema } from '@models/entities/Pair.entity';
         Helper,
         ContractService,
         PairRepository,
+        CrawlerProducer,
+        CrawlerConsumer,
     ],
     exports: [],
 })

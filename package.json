@@ -54,7 +54,7 @@
     "axios": "0.27.2",
     "bignumber.js": "9.1.0",
     "bluebird": "3.7.2",
-    "bull": "4.10.1",
+    "bull": "^4.10.4",
     "cache-manager": "4.1.0",
     "cache-manager-redis-store": "2.0.0",
     "class-transformer": "0.5.1",

@@ -4,7 +4,7 @@ import { CrawlerService } from '@modules/crawler/crawler.service';
 import LatestBlockRepository from '@models/repositories/LatestBlock.repository';
 import { LoggerService } from '@shared/modules/loggers/logger.service';
 import { Web3Service } from '@shared/web3/web3.service';
-import { PancakeSwapV2 } from '@constants/contracts';
+import { Erc1155 } from '@constants/contracts';
 import { ConfigService } from '@nestjs/config';
 import { EEnvKey } from '@constants/env.constant';
 import { ContractService } from '@modules/crawler/contract.service';
@@ -19,7 +19,7 @@ import { EventLog } from 'web3-core';
 @Console()
 @Injectable()
 export class CrawlerConsole {
-    private pancakeContract: PancakeSwapV2;
+    private erc1155Contract: Erc1155;
     private crawlPairQueue: Queue.Queue;
     private readonly sleepInMs;
     constructor(
@@ -30,7 +30,7 @@ export class CrawlerConsole {
         private contractService: ContractService,
         private crawlerService: CrawlerService,
     ) {
-        this.pancakeContract = this.contractService.getContract();
+        this.erc1155Contract = this.contractService.getContract();
         this.sleepInMs = this.configService.get(EEnvKey.SLEEP_TIME)
             ? Number(this.configService.get(EEnvKey.SLEEP_TIME))
             : Number(1000);
@@ -40,7 +40,7 @@ export class CrawlerConsole {
 
     handleWhenRpcIsError = async () => {
         await this.contractService.reInitContractAndWeb3WithOtherRpc();
-        this.pancakeContract = this.contractService.getContract();
+        this.erc1155Contract = this.contractService.getContract();
     };
 
     createCrawlPairQueue = async () => {
@@ -118,7 +118,7 @@ export class CrawlerConsole {
         let pastEvents: EventLog[];
 
         try {
-            pastEvents = await this.pancakeContract.getPastEvents('allEvents', {
+            pastEvents = await this.erc1155Contract.getPastEvents('allEvents', {
                 fromBlock: payload.fromBlock,
                 toBlock: payload.toBlock,
             });

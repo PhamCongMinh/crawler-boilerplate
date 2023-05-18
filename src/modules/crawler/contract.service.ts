@@ -3,9 +3,9 @@ import { Web3Service } from '@shared/web3/web3.service';
 import { ConfigService } from '@nestjs/config';
 import { EEnvKey } from '@constants/env.constant';
 import Web3 from 'web3';
-import PancakeSwapV2Abi from '@constants/abis/pancake-swap-v2.json';
+import Erc1155Abi from '@constants/abis/erc1155.json';
 import { AbiItem } from 'web3-utils';
-import { PancakeSwapV2 } from '@constants/contracts';
+import { Erc1155 } from '@constants/contracts';
 
 @Injectable()
 export class ContractService {
@@ -19,9 +19,9 @@ export class ContractService {
     initContractAndWeb3 = () => {
         this.web3 = this.web3Service.getWeb3();
         this.contract = new this.web3.eth.Contract(
-            PancakeSwapV2Abi as AbiItem[],
+            Erc1155Abi as AbiItem[],
             this.configService.get<string>(EEnvKey.CONTRACT_ADDRESS),
-        ) as unknown as PancakeSwapV2;
+        ) as unknown as Erc1155;
     };
 
     getContract = () => {

@@ -4,7 +4,7 @@ import { Document } from 'mongoose';
 import { Prop } from '@shared/swagger';
 import { BaseEntity } from '@shared/api/models/base.entity';
 
-export type PairDocument = Pair & Document;
+export type EventLogDocument = EventLog & Document;
 
 @Schema({
     timestamps: {
@@ -14,33 +14,27 @@ export type PairDocument = Pair & Document;
     versionKey: false,
     virtuals: true,
 })
-export class Pair extends BaseEntity {
-    @Prop({ required: true, type: String })
-    symbol: string;
-
+export class EventLog extends BaseEntity {
     @Prop({ required: true, type: String })
     address: string;
 
     @Prop({ required: true, type: String })
-    token0Symbol: string;
+    blockHash: string;
 
-    @Prop({ required: true, type: String })
-    token1Symbol: string;
-
-    @Prop({ required: true, type: String })
-    token0Address: string;
-
-    @Prop({ required: true, type: String })
-    token1Address: string;
-
-    @Prop({ required: false, type: Number })
+    @Prop({ required: true, type: Number })
     blockNumber: number;
-
-    @Prop({ required: false, type: Number })
-    blockTime: number;
 
     @Prop({ required: true, type: String })
     transactionHash: string;
+
+    @Prop({ required: true, type: String })
+    returnValues: string;
+
+    @Prop({ required: false, type: String })
+    event: string;
+
+    @Prop({ required: false, type: Number })
+    blockTime: number;
 }
 
-export const PairSchema = SchemaFactory.createForClass(Pair);
+export const EventLogSchema = SchemaFactory.createForClass(EventLog);

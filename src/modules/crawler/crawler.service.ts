@@ -1,38 +1,31 @@
 import { Injectable } from '@nestjs/common';
-import { PairRepository } from '@models/repositories/Pair.repository';
 import { EventLog } from 'web3-core';
-import { Pair } from '@models/entities/Pair.entity';
 import { Web3Service } from '@shared/web3/web3.service';
-import Erc1155Abi from '../../constants/abis/erc1155.json';
-import { AbiItem } from 'web3-utils';
 import { LoggerService } from '@shared/modules/loggers/logger.service';
-import { Erc1155 } from '@constants/contracts';
+import { EventLogRepository } from '@models/repositories/EventLog.repository';
+import { IWeb3Event } from '@modules/crawler/interfaces';
 
 @Injectable()
 export class CrawlerService {
     constructor(
-        private pairRepository: PairRepository,
+        private eventLogRepository: EventLogRepository,
         private web3Service: Web3Service,
         private readonly loggerService: LoggerService,
     ) {}
     logger = this.loggerService.getLogger('CrawlerService');
 
-    handleEvent = async (events: EventLog[]) => {
+    handleEvent = async (events: IWeb3Event[]) => {
         for (let i = 0; i < events.length; i++) {
-            switch (events[i].event) {
-                case 'PairCreated':
-                    this.logger.info(`Handle Event Create Pair:`);
-                    console.log(events[i]);
-                    await this.handleEventCreatePair(events[i]);
-                    break;
-                default: {
-                    break;
-                }
-            }
+            console.log(events[i]);
+            await this.eventLogRepository.create({
+                address: events[i].address,
+                blockHash: events[i].blockHash,
+                blockNumber: events[i].blockNumber,
+                transactionHash: events[i].transactionHash,
+                returnValues: String(events[i].returnValues),
+                event: events[i].event,
+                blockTime: events[i].blockTime,
+            });
         }
-    };
-
-    handleEventCreatePair = async (event: EventLog) => {
-        this.logger.info(`Start run handleEventCreatePair:`);
     };
 }

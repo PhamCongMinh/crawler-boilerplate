@@ -4,22 +4,21 @@ import { CrawlerService } from '@modules/crawler/crawler.service';
 import LatestBlockRepository from '@models/repositories/LatestBlock.repository';
 import { LoggerService } from '@shared/modules/loggers/logger.service';
 import { Web3Service } from '@shared/web3/web3.service';
-import { Erc1155 } from '@constants/contracts';
 import { ConfigService } from '@nestjs/config';
 import { EEnvKey } from '@constants/env.constant';
-import { ContractService } from '@modules/crawler/contract.service';
 import { BullLib } from '@modules/crawler/bull.lib';
 import Queue, { Job, DoneCallback } from 'bull';
 import { CRAWL_PAIR_QUEUE } from '@constants/queue-name.constant';
 import { getConfigRedisQueue } from '@config/redis.config';
 import Bluebird from 'bluebird';
-import { IQueuePayload } from '@modules/crawler/interfaces';
+import { IQueuePayload, IWeb3Event } from '@modules/crawler/interfaces';
 import { EventLog } from 'web3-core';
+import { EventData } from 'web3-eth-contract';
+import { Helper } from '@modules/crawler/helper';
 
 @Console()
 @Injectable()
 export class CrawlerConsole {
-    private erc1155Contract: Erc1155;
     private crawlPairQueue: Queue.Queue;
     private readonly sleepInMs;
     constructor(
@@ -27,10 +26,9 @@ export class CrawlerConsole {
         private readonly loggerService: LoggerService,
         private readonly web3Service: Web3Service,
         private readonly configService: ConfigService,
-        private contractService: ContractService,
         private crawlerService: CrawlerService,
+        private readonly helper: Helper,
     ) {
-        this.erc1155Contract = this.contractService.getContract();
         this.sleepInMs = this.configService.get(EEnvKey.SLEEP_TIME)
             ? Number(this.configService.get(EEnvKey.SLEEP_TIME))
             : Number(1000);
@@ -38,12 +36,7 @@ export class CrawlerConsole {
 
     logger = this.loggerService.getLogger('CrawlerConsole');
 
-    handleWhenRpcIsError = async () => {
-        await this.contractService.reInitContractAndWeb3WithOtherRpc();
-        this.erc1155Contract = this.contractService.getContract();
-    };
-
-    createCrawlPairQueue = async () => {
+    createCrawlQueue = async () => {
         this.crawlPairQueue = await BullLib.createNewQueue(CRAWL_PAIR_QUEUE, getConfigRedisQueue(this.configService));
     };
 
@@ -53,7 +46,7 @@ export class CrawlerConsole {
     })
     async provider() {
         this.logger.info('Start provide jobs for CRAWL_PAIR_QUEUE');
-        await this.createCrawlPairQueue();
+        await this.createCrawlQueue();
 
         // Check Table Latest Block is exist
         let latestBlock;
@@ -61,24 +54,17 @@ export class CrawlerConsole {
         if (!latestBlock) {
             latestBlock = await this.latestBlockRepository.latestDocumentModel.create({
                 key: 'provider_crawl_pair',
-                block: Number(this.configService.get<number>(EEnvKey.CONTRACT_FIRST_BLOCK)),
+                block: Number(this.configService.get<number>(EEnvKey.CONTRACT_FIRST_BLOCK)) - 1,
             });
         }
 
         let crawledLatestBlock: number = latestBlock.block;
         const sleepTime: number = this.sleepInMs;
         const blockPerProcess: number = this.configService.get(EEnvKey.BLOCK_PER_PROCESS);
+        const web3 = this.web3Service.getWeb3();
 
         while (1) {
-            // Get latest BlockNumber in chain and check rpc is still working
-            let currentBlock;
-            try {
-                currentBlock = await this.web3Service.getWeb3().eth.getBlockNumber();
-            } catch (e) {
-                this.logger.error(e);
-                await this.handleWhenRpcIsError();
-                continue;
-            }
+            const currentBlock = await web3.eth.getBlockNumber();
 
             if (currentBlock <= crawledLatestBlock) {
                 this.logger.info('Waiting new block number for create new job for Queue Create Pair');
@@ -115,20 +101,8 @@ export class CrawlerConsole {
     handleJobConsumer = async (job: Job, done: DoneCallback) => {
         const payload: IQueuePayload = job.data;
         this.logger.info(`Crawl Pairs from block ${payload.fromBlock} to block ${payload.toBlock}`);
-        let pastEvents: EventLog[];
-
-        try {
-            pastEvents = await this.erc1155Contract.getPastEvents('allEvents', {
-                fromBlock: payload.fromBlock,
-                toBlock: payload.toBlock,
-            });
-            if (pastEvents.length === 0) done();
-        } catch (e) {
-            this.logger.error(`[handleJobConsumer]`, e);
-            done(e);
-            // change other rpc
-            await this.handleWhenRpcIsError();
-        }
+        const pastEvents: IWeb3Event[] = await this.helper.getPastEvents(this.web3Service.getContract(), payload);
+        if (pastEvents.length === 0) done();
 
         try {
             await this.crawlerService.handleEvent(pastEvents);
@@ -144,7 +118,7 @@ export class CrawlerConsole {
         description: 'Run consumer crawler pair',
     })
     async consumer() {
-        await this.createCrawlPairQueue();
+        await this.createCrawlQueue();
         await this.crawlPairQueue.process(this.handleJobConsumer.bind(this));
     }
 }

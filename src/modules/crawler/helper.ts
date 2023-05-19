@@ -5,6 +5,7 @@ import { ConfigService } from '@nestjs/config';
 import { EventData } from 'web3-eth-contract';
 import pLimit from 'p-limit';
 import { LoggerService } from '@shared/modules/loggers/logger.service';
+import { IQueuePayload, IWeb3Event } from '@modules/crawler/interfaces';
 
 const limit = pLimit(5);
 
@@ -31,5 +32,19 @@ export class Helper {
                 [blockInfo.number]: blockInfo.timestamp,
             };
         }, {});
+    }
+
+    async getPastEvents(contract, payload: IQueuePayload): Promise<IWeb3Event[]> {
+        const events: EventData[] = await contract.getPastEvents('allEvents', {
+            fromBlock: payload.fromBlock,
+            toBlock: payload.toBlock,
+        });
+        const blocksInfo = await this.getBlockTimeByBlockNumbers(events);
+        return events.map((event: EventData): IWeb3Event => {
+            return {
+                ...event,
+                blockTime: blocksInfo[event.blockNumber] as unknown as number,
+            };
+        });
     }
 }

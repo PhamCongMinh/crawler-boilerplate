@@ -16,15 +16,17 @@ export class CrawlerService {
 
     handleEvent = async (events: IWeb3Event[]) => {
         for (let i = 0; i < events.length; i++) {
-            await this.eventLogRepository.create({
-                address: events[i].address,
-                blockHash: events[i].blockHash,
-                blockNumber: events[i].blockNumber,
-                transactionHash: events[i].transactionHash,
-                returnValues: JSON.stringify(events[i].returnValues),
-                event: events[i].event,
-                blockTime: events[i].blockTime,
-            });
+            if (events[i].event) {
+                await this.eventLogRepository.create({
+                    address: events[i].address,
+                    blockHash: events[i].blockHash,
+                    blockNumber: events[i].blockNumber,
+                    transactionHash: events[i].transactionHash,
+                    returnValues: JSON.stringify(events[i].returnValues),
+                    event: events[i].event,
+                    blockTime: events[i].blockTime,
+                });
+            }
         }
     };
 }

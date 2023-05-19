@@ -21,19 +21,45 @@ export interface EventOptions {
   topics?: string[];
 }
 
-export type AdminChanged = ContractEventLog<{
-  previousAdmin: string;
-  newAdmin: string;
+export type Initialized = ContractEventLog<{
+  version: string;
+  0: string;
+}>;
+export type OwnershipTransferred = ContractEventLog<{
+  previousOwner: string;
+  newOwner: string;
   0: string;
   1: string;
 }>;
-export type BeaconUpgraded = ContractEventLog<{
-  beacon: string;
+export type Paused = ContractEventLog<{
+  account: string;
   0: string;
 }>;
-export type Upgraded = ContractEventLog<{
-  implementation: string;
+export type SetTier = ContractEventLog<{
+  tier: string;
+  config: [string, string];
   0: string;
+  1: [string, string];
+}>;
+export type StakeWithTier = ContractEventLog<{
+  user: string;
+  tier: string;
+  requireAmount: string;
+  0: string;
+  1: string;
+  2: string;
+}>;
+export type Unpaused = ContractEventLog<{
+  account: string;
+  0: string;
+}>;
+export type UnstakeToTier = ContractEventLog<{
+  user: string;
+  tier: string;
+  cashbackAmount: string;
+  0: string;
+  1: string;
+  2: string;
 }>;
 
 export interface Thinkin extends BaseContract {
@@ -44,50 +70,121 @@ export interface Thinkin extends BaseContract {
   ): Thinkin;
   clone(): Thinkin;
   methods: {
-    admin(): NonPayableTransactionObject<string>;
+    configTiers(
+      tierIndexes: (number | string | BN)[],
+      configs: [number | string | BN, number | string | BN][]
+    ): NonPayableTransactionObject<void>;
 
-    implementation(): NonPayableTransactionObject<string>;
+    initialize(_stakeToken: string): NonPayableTransactionObject<void>;
 
-    upgradeTo(newImplementation: string): NonPayableTransactionObject<void>;
+    owner(): NonPayableTransactionObject<string>;
 
-    upgradeToAndCall(
-      newImplementation: string,
-      data: string | number[]
-    ): PayableTransactionObject<void>;
+    pause(): NonPayableTransactionObject<void>;
+
+    paused(): NonPayableTransactionObject<boolean>;
+
+    renounceOwnership(): NonPayableTransactionObject<void>;
+
+    stakeToken(): NonPayableTransactionObject<string>;
+
+    stakeWithTier(
+      tier: number | string | BN
+    ): NonPayableTransactionObject<void>;
+
+    tiers(arg0: number | string | BN): NonPayableTransactionObject<{
+      lockTime: string;
+      amount: string;
+      0: string;
+      1: string;
+    }>;
+
+    totalStakeAmount(): NonPayableTransactionObject<string>;
+
+    transferOwnership(newOwner: string): NonPayableTransactionObject<void>;
+
+    unpause(): NonPayableTransactionObject<void>;
+
+    unstakeToTier(
+      tier: number | string | BN
+    ): NonPayableTransactionObject<void>;
+
+    userStakeAmount(arg0: string): NonPayableTransactionObject<string>;
+
+    userStakeTime(arg0: string): NonPayableTransactionObject<string>;
+
+    userTier(arg0: string): NonPayableTransactionObject<string>;
   };
   events: {
-    AdminChanged(cb?: Callback<AdminChanged>): EventEmitter;
-    AdminChanged(
+    Initialized(cb?: Callback<Initialized>): EventEmitter;
+    Initialized(
       options?: EventOptions,
-      cb?: Callback<AdminChanged>
+      cb?: Callback<Initialized>
     ): EventEmitter;
 
-    BeaconUpgraded(cb?: Callback<BeaconUpgraded>): EventEmitter;
-    BeaconUpgraded(
+    OwnershipTransferred(cb?: Callback<OwnershipTransferred>): EventEmitter;
+    OwnershipTransferred(
       options?: EventOptions,
-      cb?: Callback<BeaconUpgraded>
+      cb?: Callback<OwnershipTransferred>
     ): EventEmitter;
 
-    Upgraded(cb?: Callback<Upgraded>): EventEmitter;
-    Upgraded(options?: EventOptions, cb?: Callback<Upgraded>): EventEmitter;
+    Paused(cb?: Callback<Paused>): EventEmitter;
+    Paused(options?: EventOptions, cb?: Callback<Paused>): EventEmitter;
+
+    SetTier(cb?: Callback<SetTier>): EventEmitter;
+    SetTier(options?: EventOptions, cb?: Callback<SetTier>): EventEmitter;
+
+    StakeWithTier(cb?: Callback<StakeWithTier>): EventEmitter;
+    StakeWithTier(
+      options?: EventOptions,
+      cb?: Callback<StakeWithTier>
+    ): EventEmitter;
+
+    Unpaused(cb?: Callback<Unpaused>): EventEmitter;
+    Unpaused(options?: EventOptions, cb?: Callback<Unpaused>): EventEmitter;
+
+    UnstakeToTier(cb?: Callback<UnstakeToTier>): EventEmitter;
+    UnstakeToTier(
+      options?: EventOptions,
+      cb?: Callback<UnstakeToTier>
+    ): EventEmitter;
 
     allEvents(options?: EventOptions, cb?: Callback<EventLog>): EventEmitter;
   };
 
-  once(event: "AdminChanged", cb: Callback<AdminChanged>): void;
+  once(event: "Initialized", cb: Callback<Initialized>): void;
   once(
-    event: "AdminChanged",
+    event: "Initialized",
     options: EventOptions,
-    cb: Callback<AdminChanged>
+    cb: Callback<Initialized>
   ): void;
 
-  once(event: "BeaconUpgraded", cb: Callback<BeaconUpgraded>): void;
+  once(event: "OwnershipTransferred", cb: Callback<OwnershipTransferred>): void;
   once(
-    event: "BeaconUpgraded",
+    event: "OwnershipTransferred",
     options: EventOptions,
-    cb: Callback<BeaconUpgraded>
+    cb: Callback<OwnershipTransferred>
   ): void;
 
-  once(event: "Upgraded", cb: Callback<Upgraded>): void;
-  once(event: "Upgraded", options: EventOptions, cb: Callback<Upgraded>): void;
+  once(event: "Paused", cb: Callback<Paused>): void;
+  once(event: "Paused", options: EventOptions, cb: Callback<Paused>): void;
+
+  once(event: "SetTier", cb: Callback<SetTier>): void;
+  once(event: "SetTier", options: EventOptions, cb: Callback<SetTier>): void;
+
+  once(event: "StakeWithTier", cb: Callback<StakeWithTier>): void;
+  once(
+    event: "StakeWithTier",
+    options: EventOptions,
+    cb: Callback<StakeWithTier>
+  ): void;
+
+  once(event: "Unpaused", cb: Callback<Unpaused>): void;
+  once(event: "Unpaused", options: EventOptions, cb: Callback<Unpaused>): void;
+
+  once(event: "UnstakeToTier", cb: Callback<UnstakeToTier>): void;
+  once(
+    event: "UnstakeToTier",
+    options: EventOptions,
+    cb: Callback<UnstakeToTier>
+  ): void;
 }

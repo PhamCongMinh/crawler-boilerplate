@@ -17,6 +17,7 @@ export class CrawlerService {
     handleEvent = async (events: IWeb3Event[]) => {
         for (let i = 0; i < events.length; i++) {
             if (events[i].event) {
+                this.logger.info(`Handle event ${events[i].event} at block ${events[i].blockNumber}`, events[i]);
                 await this.eventLogRepository.create({
                     address: events[i].address,
                     blockHash: events[i].blockHash,

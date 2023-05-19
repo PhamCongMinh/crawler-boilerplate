@@ -39,7 +39,6 @@ export class Helper {
             fromBlock: payload.fromBlock,
             toBlock: payload.toBlock,
         });
-        console.log(events);
         const blocksInfo = await this.getBlockTimeByBlockNumbers(events);
         return events.map((event: EventData): IWeb3Event => {
             return {

@@ -10,14 +10,14 @@ import THINKIN_ABI from '@constants/abis/thinkin.json';
 @Injectable()
 export class Web3Service {
     private web3: Web3;
-    private contract: Thinkin;
+    private contract;
 
     constructor(private readonly configService: ConfigService, private readonly loggerService: LoggerService) {
         this.web3 = new Web3(new Web3.providers.HttpProvider(this.configService.get<string>(EEnvKey.RPC)));
         this.contract = new this.web3.eth.Contract(
             THINKIN_ABI as AbiItem[],
             this.configService.get<string>(EEnvKey.CONTRACT_ADDRESS),
-        ) as unknown as Thinkin;
+        );
     }
     private logger = this.loggerService.getLogger('Web3Service');
 

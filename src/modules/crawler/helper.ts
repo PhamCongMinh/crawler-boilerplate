@@ -35,10 +35,11 @@ export class Helper {
     }
 
     async getPastEvents(contract, payload: IQueuePayload): Promise<IWeb3Event[]> {
-        const events: EventData[] = await contract.getPastEvents('allEvents', {
+        const events = await contract.getPastEvents('allEvents', {
             fromBlock: payload.fromBlock,
             toBlock: payload.toBlock,
         });
+        console.log(events);
         const blocksInfo = await this.getBlockTimeByBlockNumbers(events);
         return events.map((event: EventData): IWeb3Event => {
             return {

@@ -33,7 +33,7 @@ export class EventLog extends BaseEntity {
     @Prop({ required: false, type: String })
     event: string;
 
-    @Prop({ required: false, type: Number })
+    @Prop({ required: true, type: Number })
     blockTime: number;
 }
 

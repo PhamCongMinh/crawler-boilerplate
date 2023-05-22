@@ -1,14 +1,9 @@
 version: '3.7'
 services:
-  test:
-    build:
-      context: .
-      dockerfile: ./Dockerfile
-    container_name: test
-    env_file:
-      - .env
-    command: bash -c "npm run start"
-    tty: true
+  redis:
+    image: redis:alpine
+    hostname: redis
     ports:
-      - "${PORT}:${PORT}"
-    restart: always
+      - 6380:6379
+    volumes:
+      - ./redis/data:/data
